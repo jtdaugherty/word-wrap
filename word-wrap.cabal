@@ -11,6 +11,15 @@ category:            Text
 build-type:          Simple
 extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
+Homepage:            https://github.com/jtdaugherty/word-wrap/
+Bug-reports:         https://github.com/jtdaugherty/word-wrap/issues
+
+extra-doc-files:     README.md
+                     CHANGELOG.md
+
+Source-Repository head
+  type:     git
+  location: git://github.com/jtdaugherty/word-wrap.git
 
 library
   exposed-modules:
