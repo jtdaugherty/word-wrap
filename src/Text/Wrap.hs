@@ -1,6 +1,6 @@
 module Text.Wrap
-  ( wrapText
-  , wrapTextToLines
+  ( wrapTextToLines
+  , wrapText
   )
 where
 
@@ -9,10 +9,12 @@ import qualified Data.Text as T
 
 -- | Wrap text at the specified width. Newlines and whitespace in the
 -- input text are preserved. Returns the lines of text in wrapped form.
+-- New lines introduced due to wrapping will have leading whitespace
+-- stripped.
 wrapTextToLines :: Int -> T.Text -> [T.Text]
 wrapTextToLines amt s = concat $ fmap (wrapLine amt) $ T.lines s
 
--- | Like wrapTextToLines, but returns the wrapped text reconstructed
+-- | Like 'wrapTextToLines', but returns the wrapped text reconstructed
 -- with newlines inserted at wrap points.
 wrapText :: Int -> T.Text -> T.Text
 wrapText amt s = T.intercalate (T.pack "\n") $ wrapTextToLines amt s
