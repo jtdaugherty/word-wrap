@@ -10,7 +10,7 @@ import qualified Data.Text as T
 -- | Wrap text at the specified width. Newlines and whitespace in the
 -- input text are preserved. Returns the lines of text in wrapped form.
 wrapTextToLines :: Int -> T.Text -> [T.Text]
-wrapTextToLines amt s = concat $ wrapLine amt <$> T.lines s
+wrapTextToLines amt s = concat $ fmap (wrapLine amt) $ T.lines s
 
 -- | Like wrapTextToLines, but returns the wrapped text reconstructed
 -- with newlines inserted at wrap points.
@@ -52,7 +52,7 @@ wrapLine limit t =
         go [tok]  = [tokenContent tok]
         go ts =
             let (firstLine, maybeRest) = breakTokens limit ts
-                firstLineText = T.stripEnd $ T.concat $ tokenContent <$> firstLine
+                firstLineText = T.stripEnd $ T.concat $ fmap tokenContent firstLine
             in case maybeRest of
                 Nothing -> [firstLineText]
                 Just rest -> firstLineText : go rest
