@@ -29,7 +29,7 @@ library
   hs-source-dirs:      src
   default-language:    Haskell2010
   ghc-options:         -Werror -Wall
-  build-depends:       base,
+  build-depends:       base < 5,
                        text
 
 test-suite word-wrap-tests
@@ -38,6 +38,6 @@ test-suite word-wrap-tests
   hs-source-dirs:      tests
   main-is:             Main.hs
   ghc-options:         -Werror -Wall
-  build-depends:       base,
+  build-depends:       base < 5,
                        word-wrap,
                        hspec >= 2.4
