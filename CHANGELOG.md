@@ -1,4 +1,11 @@
 
+0.1.2
+=====
+
+Bug fixes:
+ * Fixed a bug where multiple consecutive newlines were not properly preserved
+   as advertised (#2)
+
 0.1.1
 =====
 
