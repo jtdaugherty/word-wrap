@@ -9,7 +9,6 @@ maintainer:          cygnus@foobox.com
 copyright:           2017 Jonathan Daugherty
 category:            Text
 build-type:          Simple
-extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 Homepage:            https://github.com/jtdaugherty/word-wrap/
 Bug-reports:         https://github.com/jtdaugherty/word-wrap/issues
