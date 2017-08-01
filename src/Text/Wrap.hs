@@ -49,7 +49,7 @@ wrapLine :: Int
          -- ^ A single line of text.
          -> [T.Text]
 wrapLine limit t =
-    let go []     = []
+    let go []     = [T.empty]
         go [WS _] = []
         go [tok]  = [tokenContent tok]
         go ts =

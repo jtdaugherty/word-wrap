@@ -17,7 +17,7 @@ main = hspec $ do
       wrapTextToLines 10 "  Hello, World!" `shouldBe` ["  Hello,", "World!"]
 
     it "honors preexisting newlines" $ do
-      wrapTextToLines 100 "Hello,\nWorld!" `shouldBe` ["Hello,", "World!"]
+      wrapTextToLines 100 "Hello,\n\nWorld!" `shouldBe` ["Hello,", "", "World!"]
 
     it "wraps long lines without truncation" $ do
       wrapTextToLines 2 "Hello, World!" `shouldBe` ["Hello,", "World!"]
