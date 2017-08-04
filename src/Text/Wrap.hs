@@ -50,7 +50,7 @@ wrapLine :: Int
          -> [T.Text]
 wrapLine limit t =
     let go []     = [T.empty]
-        go [WS _] = []
+        go [WS _] = [T.empty]
         go [tok]  = [tokenContent tok]
         go ts =
             let (firstLine, maybeRest) = breakTokens limit ts
