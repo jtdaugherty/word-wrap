@@ -7,6 +7,7 @@ module Text.Wrap
   )
 where
 
+import Data.Monoid ((<>))
 import Data.Char (isSpace)
 import qualified Data.Text as T
 
@@ -74,14 +75,8 @@ wrapLine :: WrapSettings
 wrapLine settings limit t =
     let go []     = [T.empty]
         go [WS _] = [T.empty]
-        go [tok]  = if breakLongWords settings
-                    then let (h, tl) = T.splitAt limit $ tokenContent tok
-                         in if T.null tl
-                            then [h]
-                            else h : go [NonWS tl]
-                    else [tokenContent tok]
         go ts =
-            let (firstLine, maybeRest) = breakTokens limit ts
+            let (firstLine, maybeRest) = breakTokens settings limit ts
                 firstLineText = T.stripEnd $ T.concat $ fmap tokenContent firstLine
             in case maybeRest of
                 Nothing -> [firstLineText]
@@ -98,35 +93,49 @@ wrapLine settings limit t =
 -- right, return Just those too (or Nothing if there weren't any). If
 -- this breaks a sequence at at point where the next token after the
 -- break point is whitespace, that whitespace token is removed.
-breakTokens :: Int -> [Token] -> ([Token], Maybe [Token])
-breakTokens _ [] = ([], Nothing)
-breakTokens _ [t] = ([t], Nothing)
-breakTokens limit ts =
+breakTokens :: WrapSettings -> Int -> [Token] -> ([Token], Maybe [Token])
+breakTokens _ _ [] = ([], Nothing)
+breakTokens settings limit ts =
     -- Take enough tokens until we reach the point where taking more
     -- would exceed the line length.
-    let go _ [] = []
-        -- If the line starts with a token that itself exceeds the
+    let go _ [] = ([], [])
+        -- If the line contains a single token that itself exceeds the
         -- limit, just take that single token as the only one on this
         -- line.
-        go acc (tok:_) | acc == 0 && tokenLength tok > limit = [tok]
+        go acc (tok:rest) | acc == 0 && tokenLength tok > limit =
+            case breakLongWords settings of
+                False -> ([tok], rest)
+                True ->
+                    case tok of
+                        WS _ -> ([], rest)
+                        NonWS _ ->
+                            let (h, tl) = T.splitAt limit (tokenContent tok)
+                            in ([NonWS h], tokenize tl <> rest)
         -- Otherwise take a token if its length plus the accumulator
         -- doesn't exceed the limit.
         go acc (tok:toks) =
             if tokenLength tok + acc <= limit
-            then tok : go (acc + tokenLength tok) toks
-            else []
+            then let (nextAllowed, nextDisallowed) = go (acc + tokenLength tok) toks
+                 in (tok : nextAllowed, nextDisallowed)
+            else if not $ breakLongWords settings
+                 then ([], (tok:toks))
+                 else case tok of
+                     WS _ -> ([], toks)
+                     NonWS _ ->
+                         let (h, tl) = T.splitAt (limit - acc) (tokenContent tok)
+                         in ([NonWS h], tokenize tl <> toks)
 
-        -- Allowed tokens are the ones we keep on this line.
-        allowed = go 0 ts
-        -- The rest go on the next line, to be wrapped again.
-        rest = maybeTrim $ drop (length allowed) ts
+        -- Allowed tokens are the ones we keep on this line. The rest go
+        -- on the next line, to be wrapped again.
+        (allowed, disallowed') = go 0 ts
+        disallowed = maybeTrim disallowed'
 
         -- Trim leading whitespace on wrapped lines.
         maybeTrim [] = []
         maybeTrim (WS _:toks) = toks
         maybeTrim toks = toks
 
-        result = if null rest
+        result = if null disallowed
                  then (allowed, Nothing)
-                 else (allowed, Just rest)
+                 else (allowed, Just disallowed)
     in result

@@ -39,5 +39,14 @@ main = hspec $ do
 
     it "breaks long non-whitespace tokens" $ do
       let s = defaultWrapSettings { breakLongWords = True }
-      wrapTextToLines s 7 "HelloCrazyWorld!"
-        `shouldBe` ["HelloCr", "azyWorl", "d!"]
+      wrapTextToLines s 7 "HelloCrazyWorld!\nReallyLong Token"
+        `shouldBe` ["HelloCr", "azyWorl", "d!", "ReallyL", "ong Tok", "en"]
+
+    it "breaks long non-whitespace tokens and indents" $ do
+      let s = defaultWrapSettings { breakLongWords = True
+                                  , preserveIndentation = True
+                                  }
+      wrapTextToLines s 7 "  HelloCrazyWorld!\n  ReallyLong Token"
+        `shouldBe` [ "  Hello", "  Crazy", "  World", "  !"
+                   , "  Reall", "  yLong", "  Token"
+                   ]
