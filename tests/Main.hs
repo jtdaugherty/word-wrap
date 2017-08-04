@@ -28,11 +28,16 @@ main = hspec $ do
         `shouldBe` ["Hello,", "World!"]
 
     it "preserves indentation" $ do
-      let s = WrapSettings { preserveIndentation = True }
+      let s = defaultWrapSettings { preserveIndentation = True }
       wrapTextToLines s 10 "  Hello, World!"
         `shouldBe` ["  Hello,", "  World!"]
 
     it "preserves indentation (2)" $ do
-      let s = WrapSettings { preserveIndentation = True }
+      let s = defaultWrapSettings { preserveIndentation = True }
       wrapTextToLines s 10 "  Hello, World!\n    Things And Stuff"
         `shouldBe` ["  Hello,", "  World!", "    Things", "    And", "    Stuff"]
+
+    it "breaks long non-whitespace tokens" $ do
+      let s = defaultWrapSettings { breakLongWords = True }
+      wrapTextToLines s 7 "HelloCrazyWorld!"
+        `shouldBe` ["HelloCr", "azyWorl", "d!"]

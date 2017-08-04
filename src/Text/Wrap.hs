@@ -15,12 +15,16 @@ data WrapSettings =
     WrapSettings { preserveIndentation :: Bool
                  -- ^ Whether to indent new lines created by wrapping
                  -- when their original line was indented.
+                 , breakLongWords :: Bool
+                 -- ^ Whether to break in the middle of individual words
+                 -- when not doing so would result in a long line.
                  }
                  deriving (Eq, Show, Read)
 
 defaultWrapSettings :: WrapSettings
 defaultWrapSettings =
     WrapSettings { preserveIndentation = False
+                 , breakLongWords = False
                  }
 
 -- | Wrap text at the specified width. Newlines and whitespace in the
@@ -70,7 +74,12 @@ wrapLine :: WrapSettings
 wrapLine settings limit t =
     let go []     = [T.empty]
         go [WS _] = [T.empty]
-        go [tok]  = [tokenContent tok]
+        go [tok]  = if breakLongWords settings
+                    then let (h, tl) = T.splitAt limit $ tokenContent tok
+                         in if T.null tl
+                            then [h]
+                            else h : go [NonWS tl]
+                    else [tokenContent tok]
         go ts =
             let (firstLine, maybeRest) = breakTokens limit ts
                 firstLineText = T.stripEnd $ T.concat $ fmap tokenContent firstLine
