@@ -1,5 +1,8 @@
 module Text.Wrap
-  ( wrapTextToLines
+  ( WrapSettings(..)
+  , defaultWrapSettings
+
+  , wrapTextToLines
   , wrapText
   )
 where
@@ -7,17 +10,32 @@ where
 import Data.Char (isSpace)
 import qualified Data.Text as T
 
+-- | Settings to control how wrapping is performed.
+data WrapSettings =
+    WrapSettings { preserveIndentation :: Bool
+                 -- ^ Whether to indent new lines created by wrapping
+                 -- when their original line was indented.
+                 }
+                 deriving (Eq, Show, Read)
+
+defaultWrapSettings :: WrapSettings
+defaultWrapSettings =
+    WrapSettings { preserveIndentation = False
+                 }
+
 -- | Wrap text at the specified width. Newlines and whitespace in the
 -- input text are preserved. Returns the lines of text in wrapped form.
 -- New lines introduced due to wrapping will have leading whitespace
 -- stripped.
-wrapTextToLines :: Int -> T.Text -> [T.Text]
-wrapTextToLines amt s = concat $ fmap (wrapLine amt) $ T.lines s
+wrapTextToLines :: WrapSettings -> Int -> T.Text -> [T.Text]
+wrapTextToLines settings amt s =
+    concat $ fmap (wrapLine settings amt) $ T.lines s
 
 -- | Like 'wrapTextToLines', but returns the wrapped text reconstructed
 -- with newlines inserted at wrap points.
-wrapText :: Int -> T.Text -> T.Text
-wrapText amt s = T.intercalate (T.pack "\n") $ wrapTextToLines amt s
+wrapText :: WrapSettings -> Int -> T.Text -> T.Text
+wrapText settings amt s =
+    T.intercalate (T.pack "\n") $ wrapTextToLines settings amt s
 
 data Token = WS T.Text | NonWS T.Text
            deriving (Show)
@@ -43,12 +61,14 @@ tokenize t =
 
 -- | Wrap a single line of text into a list of lines that all satisfy
 -- the wrapping width.
-wrapLine :: Int
+wrapLine :: WrapSettings
+         -- ^ Settings.
+         -> Int
          -- ^ The wrapping width.
          -> T.Text
          -- ^ A single line of text.
          -> [T.Text]
-wrapLine limit t =
+wrapLine settings limit t =
     let go []     = [T.empty]
         go [WS _] = [T.empty]
         go [tok]  = [tokenContent tok]
@@ -57,7 +77,12 @@ wrapLine limit t =
                 firstLineText = T.stripEnd $ T.concat $ fmap tokenContent firstLine
             in case maybeRest of
                 Nothing -> [firstLineText]
-                Just rest -> firstLineText : go rest
+                Just rest ->
+                    let maybeIndent = if preserveIndentation settings
+                                      then ((WS indent) :)
+                                      else id
+                        indent = T.takeWhile isSpace firstLineText
+                    in firstLineText : go (maybeIndent rest)
     in go (tokenize t)
 
 -- | Break a token sequence so that all tokens up to but not exceeding
