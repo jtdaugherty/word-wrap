@@ -1,4 +1,11 @@
 
+0.3.1
+=====
+
+Bug fixes:
+ * Fix inconsistent long token breaking (long tokens anywhere but the
+   beginning of a line)
+
 0.3
 ===
 
