@@ -41,8 +41,7 @@ data Token = WS T.Text | NonWS T.Text
            deriving (Show)
 
 tokenLength :: Token -> Int
-tokenLength (WS t) = T.length t
-tokenLength (NonWS t) = T.length t
+tokenLength = T.length . tokenContent
 
 tokenContent :: Token -> T.Text
 tokenContent (WS t) = t
