@@ -1,4 +1,12 @@
 
+0.3
+===
+
+API changes:
+ * Added the breakLongWords setting to WrapSettings. This setting makes
+   it possible to cause words to get broken up over multiple lines if
+   their lengths exceed the wrapping width.
+
 0.2
 ===
 
