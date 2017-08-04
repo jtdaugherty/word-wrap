@@ -1,4 +1,17 @@
 
+0.2
+===
+
+API changes:
+ * Added a WrapSettings data type for controlling wrapping behavior.
+ * All functions now require a WrapSettings.
+ * Added defaultWrapSettings for prior behavior.
+ * Wrap settings now include a setting to control how indentation is
+   preserved in broken lines.
+
+Bug fixes:
+ * Lines with only whitespace are preserved as empty lines.
+
 0.1.2
 =====
 
