@@ -99,20 +99,6 @@ breakTokens settings limit ts =
     -- Take enough tokens until we reach the point where taking more
     -- would exceed the line length.
     let go _ [] = ([], [])
-        -- If the line contains a single token that itself exceeds the
-        -- limit, just take that single token as the only one on this
-        -- line.
-        go acc (tok:rest) | acc == 0 && tokenLength tok > limit =
-            case breakLongWords settings of
-                False -> ([tok], rest)
-                True ->
-                    case tok of
-                        WS _ -> ([], rest)
-                        NonWS _ ->
-                            let (h, tl) = T.splitAt limit (tokenContent tok)
-                            in ([NonWS h], tokenize tl <> rest)
-        -- Otherwise take a token if its length plus the accumulator
-        -- doesn't exceed the limit.
         go acc (tok:toks) =
             if tokenLength tok + acc <= limit
             then let (nextAllowed, nextDisallowed) = go (acc + tokenLength tok) toks
