@@ -103,13 +103,16 @@ breakTokens settings limit ts =
             if tokenLength tok + acc <= limit
             then let (nextAllowed, nextDisallowed) = go (acc + tokenLength tok) toks
                  in (tok : nextAllowed, nextDisallowed)
-            else if not $ breakLongWords settings
-                 then ([], (tok:toks))
-                 else case tok of
+            else case tok of
                      WS _ -> ([], toks)
                      NonWS _ ->
-                         let (h, tl) = T.splitAt (limit - acc) (tokenContent tok)
-                         in ([NonWS h], tokenize tl <> toks)
+                         if not $ breakLongWords settings
+                         then if acc == 0
+                              then ([tok], toks)
+                              else ([], tok:toks)
+                         else let remaining = max 0 (limit - acc)
+                                  (h, tl) = T.splitAt remaining (tokenContent tok)
+                              in ([NonWS h], tokenize tl <> toks)
 
         -- Allowed tokens are the ones we keep on this line. The rest go
         -- on the next line, to be wrapped again.
