@@ -1,4 +1,10 @@
 
+0.3.2
+=====
+
+Bug fixes:
+ * Fixed a bug that prevented wrapping sometimes.
+
 0.3.1
 =====
 
