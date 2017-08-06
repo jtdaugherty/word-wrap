@@ -73,20 +73,20 @@ wrapLine :: WrapSettings
          -- ^ A single line of text.
          -> [T.Text]
 wrapLine settings limit t =
-    let go []     = [T.empty]
-        go [WS _] = [T.empty]
-        go ts =
-            let (firstLine, maybeRest) = breakTokens settings limit ts
+    let go _ []     = [T.empty]
+        go _ [WS _] = [T.empty]
+        go lim ts =
+            let (firstLine, maybeRest) = breakTokens settings lim ts
                 firstLineText = T.stripEnd $ T.concat $ fmap tokenContent firstLine
             in case maybeRest of
                 Nothing -> [firstLineText]
-                Just rest ->
-                    let maybeIndent = if preserveIndentation settings
-                                      then ((WS indent) :)
-                                      else id
-                        indent = T.takeWhile isSpace firstLineText
-                    in firstLineText : go (maybeIndent rest)
-    in go (tokenize t)
+                Just rest -> firstLineText : go lim rest
+        (indent, modifiedText) = if preserveIndentation settings
+                         then let i = T.takeWhile isSpace t
+                              in (i, T.drop (T.length i) t)
+                         else (T.empty, t)
+        result = go (limit - T.length indent) (tokenize modifiedText)
+    in (indent <>) <$> result
 
 -- | Break a token sequence so that all tokens up to but not exceeding
 -- a length limit are included on the left, and if any remain on the
@@ -98,7 +98,14 @@ breakTokens _ _ [] = ([], Nothing)
 breakTokens settings limit ts =
     -- Take enough tokens until we reach the point where taking more
     -- would exceed the line length.
-    let go _ [] = ([], [])
+    let go _ []     = ([], [])
+        go 0 (t@(NonWS _):toks) =
+            if tokenLength t <= limit
+            then ([t], toks)
+            else if not $ breakLongWords settings
+                 then ([t], toks)
+                 else let (h, tl) = T.splitAt limit (tokenContent t)
+                      in ([NonWS h], NonWS tl : toks)
         go acc (tok:toks) =
             if tokenLength tok + acc <= limit
             then let (nextAllowed, nextDisallowed) = go (acc + tokenLength tok) toks
@@ -106,13 +113,9 @@ breakTokens settings limit ts =
             else case tok of
                      WS _ -> ([], toks)
                      NonWS _ ->
-                         if not $ breakLongWords settings
-                         then if acc == 0
-                              then ([tok], toks)
-                              else ([], tok:toks)
-                         else let remaining = max 0 (limit - acc)
-                                  (h, tl) = T.splitAt remaining (tokenContent tok)
-                              in ([NonWS h], tokenize tl <> toks)
+                         if acc == 0
+                         then ([tok], toks)
+                         else ([], tok:toks)
 
         -- Allowed tokens are the ones we keep on this line. The rest go
         -- on the next line, to be wrapped again.
