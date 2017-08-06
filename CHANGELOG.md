@@ -1,4 +1,11 @@
 
+0.3.3
+=====
+
+Bug fixes:
+ * Fixed accidental breaking of long tokens when they could be wrapped
+   instead.
+
 0.3.2
 =====
 
