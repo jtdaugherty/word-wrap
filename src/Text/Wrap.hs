@@ -17,8 +17,8 @@ data WrapSettings =
                  -- ^ Whether to indent new lines created by wrapping
                  -- when their original line was indented.
                  , breakLongWords :: Bool
-                 -- ^ Whether to break in the middle of individual words
-                 -- when not doing so would result in a long line.
+                 -- ^ Whether to break in the middle of the first word
+                 -- on a line when that word exceeds the wrapping width.
                  }
                  deriving (Eq, Show, Read)
 
