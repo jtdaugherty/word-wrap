@@ -99,6 +99,9 @@ breakTokens settings limit ts =
     -- Take enough tokens until we reach the point where taking more
     -- would exceed the line length.
     let go _ []     = ([], [])
+        -- If the line starts with a non-whitespace token that exceeds
+        -- the limit, we either keep it (breakLongWords = False) or
+        -- break it (breakLongWords = True).
         go 0 (t@(NonWS _):toks) =
             if tokenLength t <= limit
             then ([t], toks)
@@ -106,6 +109,9 @@ breakTokens settings limit ts =
                  then ([t], toks)
                  else let (h, tl) = T.splitAt limit (tokenContent t)
                       in ([NonWS h], NonWS tl : toks)
+        -- The general case: check to see whether the next token exceeds
+        -- the limit. If so, bump it to the next line and terminate.
+        -- Otherwise keep it and continue to the next token.
         go acc (tok:toks) =
             if tokenLength tok + acc <= limit
             then let (nextAllowed, nextDisallowed) = go (acc + tokenLength tok) toks
