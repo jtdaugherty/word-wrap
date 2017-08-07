@@ -8,8 +8,8 @@ import Text.Wrap
 main :: IO ()
 main = hspec $ do
     it "leaves short lines untouched" $ do
-      wrapTextToLines defaultWrapSettings 5 "foo"
-        `shouldBe` ["foo"]
+      wrapTextToLines defaultWrapSettings 7 "foo bar"
+        `shouldBe` ["foo bar"]
 
     it "wraps long lines" $ do
       wrapTextToLines defaultWrapSettings 7 "Hello, World!"
