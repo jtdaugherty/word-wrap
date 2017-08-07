@@ -1,4 +1,15 @@
 
+0.4
+===
+
+Bug fixes:
+ * Fixed a bug where each line was being wrapped after every word
+   because only one case in breakTokens was reached (thanks Callum
+   Oakley)
+
+Package changes:
+ * Added a simple benchmark suite
+
 0.3.3
 =====
 
