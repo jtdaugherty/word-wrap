@@ -51,7 +51,14 @@ main = hspec $ do
                    , "  Reall", "  yLong", "  Token"
                    ]
 
-    it "gracefully handles indentation longer than the target width" $ do
+    it "gracefully handles indentation longer than the target width when breaking is off" $ do
+      let s = defaultWrapSettings { breakLongWords = False
+                                  , preserveIndentation = True
+                                  }
+      wrapTextToLines s 4 "           foo bar"
+        `shouldBe` ["   foo", "   bar"]
+
+    it "gracefully handles indentation longer than the target width when breaking is on" $ do
       let s = defaultWrapSettings { breakLongWords = True
                                   , preserveIndentation = True
                                   }
