@@ -82,9 +82,9 @@ wrapLine settings limit t =
                 Nothing -> [firstLineText]
                 Just rest -> firstLineText : go lim rest
         (indent, modifiedText) = if preserveIndentation settings
-                         then let i = T.takeWhile isSpace t
-                              in (T.take (limit - 1) i, T.drop (T.length i) t)
-                         else (T.empty, t)
+                                 then let i = T.takeWhile isSpace t
+                                      in (T.take (limit - 1) i, T.drop (T.length i) t)
+                                 else (T.empty, t)
         result = go (limit - T.length indent) (tokenize modifiedText)
     in (indent <>) <$> result
 
