@@ -50,3 +50,10 @@ main = hspec $ do
         `shouldBe` [ "  Hello", "  Crazy", "  World", "  !"
                    , "  Reall", "  yLong", "  Token"
                    ]
+
+    it "gracefully handles indentation longer than the target width" $ do
+      let s = defaultWrapSettings { breakLongWords = True
+                                  , preserveIndentation = True
+                                  }
+      wrapTextToLines s 4 "           foo bar"
+        `shouldBe` ["   f", "   o", "   o", "   b", "   a", "   r"]
