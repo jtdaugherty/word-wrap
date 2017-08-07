@@ -99,19 +99,9 @@ breakTokens settings limit ts =
     -- Take enough tokens until we reach the point where taking more
     -- would exceed the line length.
     let go _ []     = ([], [])
-        -- If the line starts with a non-whitespace token that exceeds
-        -- the limit, we either keep it (breakLongWords = False) or
-        -- break it (breakLongWords = True).
-        go 0 (t@(NonWS _):toks) =
-            if tokenLength t <= limit
-            then ([t], toks)
-            else if not $ breakLongWords settings
-                 then ([t], toks)
-                 else let (h, tl) = T.splitAt limit (tokenContent t)
-                      in ([NonWS h], NonWS tl : toks)
-        -- The general case: check to see whether the next token exceeds
-        -- the limit. If so, bump it to the next line and terminate.
-        -- Otherwise keep it and continue to the next token.
+        -- Check to see whether the next token exceeds the limit. If so, bump
+        -- it to the next line and terminate. Otherwise keep it and continue to
+        -- the next token.
         go acc (tok:toks) =
             if tokenLength tok + acc <= limit
             then let (nextAllowed, nextDisallowed) = go (acc + tokenLength tok) toks
@@ -119,8 +109,10 @@ breakTokens settings limit ts =
             else case tok of
                      WS _ -> ([], toks)
                      NonWS _ ->
-                         if acc == 0
-                         then ([tok], toks)
+                         if acc == 0 && breakLongWords settings
+                         then let (h, tl) = T.splitAt limit (tokenContent tok)
+                              in ([NonWS h], NonWS tl : toks)
+                         else if acc == 0 then ([tok], toks)
                          else ([], tok:toks)
 
         -- Allowed tokens are the ones we keep on this line. The rest go
