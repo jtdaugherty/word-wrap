@@ -1,4 +1,24 @@
 
+0.4.1
+=====
+
+Bug fixes:
+ * Fixed a bug that caused breakTokens to diverge for lines with
+   indentation longer than the indentation width when
+   preserveIndentation was enabled. (Thanks Callum Oakley.) The
+   resulting fix does the following:
+   * When breakLongWords is enabled, this change reduces the indentation
+     of the indented lines to result in lines that are no longer than
+     the wrap limit, so they will have reduced indentation and word
+     fragments. This is a trade-off with other options that are open to
+     evaluation.
+   * When breakLongWords is disabled, this change reduces the
+     indentation of the indented lines and leaves whole words, unbroken,
+     on them, resulting in lines that are longer than the indentation
+     limit. This behavior is similar to non-indented lines with
+     over-long tokens. This is also a trade-off with other options that
+     are open to evaluation.
+
 0.4
 ===
 
