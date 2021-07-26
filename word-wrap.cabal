@@ -9,7 +9,7 @@ maintainer:          cygnus@foobox.com
 copyright:           2017 Jonathan Daugherty
 category:            Text
 build-type:          Simple
-cabal-version:       >=1.18
+cabal-version:       1.18
 Homepage:            https://github.com/jtdaugherty/word-wrap/
 Bug-reports:         https://github.com/jtdaugherty/word-wrap/issues
 
