@@ -1,4 +1,14 @@
 
+0.5
+===
+
+API changes:
+ * Line-wrapping now supports optional "filling", i.e., placing prefix
+   strings at the start of wrapped lines. The behavior of filling is
+   configured by new `WrapSettings` fields: `fillStrategy` (what to
+   add to filled lines) and `fillScope` (which lines to affect with
+   filling). Thanks to Brent Yorgey for this work!
+
 0.4.1
 =====
 
