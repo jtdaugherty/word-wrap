@@ -64,3 +64,65 @@ main = hspec $ do
                                   }
       wrapTextToLines s 4 "           foo bar"
         `shouldBe` ["   f", "   o", "   o", "   b", "   a", "   r"]
+
+    it "indents all but the first line" $ do
+      let s = defaultWrapSettings { fillStrategy = FillIndent 2 }
+      wrapTextToLines s 8 "Hello there, World!"
+        `shouldBe` ["Hello", "  there,", "  World!"]
+
+    it "indents all lines" $ do
+      let s = defaultWrapSettings { fillStrategy = FillIndent 2
+                                  , fillScope = FillAll
+                                  }
+      wrapTextToLines s 8 "Hello there, World!"
+        `shouldBe` ["  Hello", "  there,", "  World!"]
+
+    it "fills all lines but the first with a prefix" $ do
+      let s = defaultWrapSettings { fillStrategy = FillPrefix "- " }
+      wrapTextToLines s 8 "Hello there, World!"
+        `shouldBe` ["Hello", "- there,", "- World!"]
+
+    it "fills all lines with a prefix" $ do
+      let s = defaultWrapSettings { fillStrategy = FillPrefix "- "
+                                  , fillScope = FillAll
+                                  }
+      wrapTextToLines s 8 "Hello there, World!"
+        `shouldBe` ["- Hello", "- there,", "- World!"]
+
+    it "takes fill width into account" $ do
+      let s = defaultWrapSettings { fillStrategy = FillPrefix "- " }
+      wrapTextToLines s 3 "a b c d"
+        `shouldBe` ["a b", "- c", "- d"]
+
+    it "takes fill indent into account" $ do
+      let s = defaultWrapSettings { fillStrategy = FillIndent 2 }
+      wrapTextToLines s 3 "a b c d"
+        `shouldBe` ["a b", "  c", "  d"]
+
+    it "takes fill width into account on all lines" $ do
+      let s = defaultWrapSettings { fillStrategy = FillPrefix "- "
+                                  , fillScope = FillAll
+                                  }
+      wrapTextToLines s 3 "a b c d"
+        `shouldBe` ["- a", "- b", "- c", "- d"]
+
+    it "takes fill indent into account on all lines" $ do
+      let s = defaultWrapSettings { fillStrategy = FillIndent 2
+                                  , fillScope = FillAll
+                                  }
+      wrapTextToLines s 3 "a b c d"
+        `shouldBe` ["  a", "  b", "  c", "  d"]
+
+    it "places fill after preserved indent" $ do
+      let s = defaultWrapSettings { preserveIndentation = True
+                                  , fillStrategy = FillPrefix "- "
+                                  }
+      wrapTextToLines s 5 "  a b c d"
+        `shouldBe` ["  a b", "  - c", "  - d"]
+
+    it "places fill indent after preserved indent" $ do
+      let s = defaultWrapSettings { preserveIndentation = True
+                                  , fillStrategy = FillIndent 2
+                                  }
+      wrapTextToLines s 5 "  a b c d"
+        `shouldBe` ["  a b", "    c", "    d"]
