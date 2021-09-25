@@ -1,5 +1,7 @@
 module Text.Wrap
-  ( WrapSettings(..)
+  ( FillStrategy(..)
+  , FillScope(..)
+  , WrapSettings(..)
   , defaultWrapSettings
 
   , wrapTextToLines
@@ -11,6 +13,27 @@ import Data.Monoid ((<>))
 import Data.Char (isSpace)
 import qualified Data.Text as T
 
+-- | How should wrapped lines be filled (i.e. what kind of prefix
+--   should be attached?)
+data FillStrategy
+  = NoFill             -- ^ Don't do any filling (default)
+  | FillIndent Int     -- ^ Indent by this many spaces
+  | FillPrefix T.Text  -- ^ Prepend this text
+  deriving (Eq, Show, Read)
+
+fillWidth :: FillStrategy -> Int
+fillWidth NoFill         = 0
+fillWidth (FillIndent n) = n
+fillWidth (FillPrefix t) = T.length t
+
+-- | To which lines should the fill strategy be applied?
+data FillScope
+  = FillAfterFirst     -- ^ Apply any fill prefix only to lines after
+                       --   the first line (default)
+  | FillAll            -- ^ Apply any fill prefix to all lines, even
+                       --   if there is only one line
+  deriving (Eq, Show, Read)
+
 -- | Settings to control how wrapping is performed.
 data WrapSettings =
     WrapSettings { preserveIndentation :: Bool
@@ -19,6 +42,12 @@ data WrapSettings =
                  , breakLongWords :: Bool
                  -- ^ Whether to break in the middle of the first word
                  -- on a line when that word exceeds the wrapping width.
+                 , fillStrategy        :: FillStrategy
+                 -- ^ What kind of prefix should be applied to lines
+                 --   after wrapping? (default: none)
+                 , fillScope           :: FillScope
+                 -- ^ To which lines should the fill strategy be applied?
+                 --   (default: all but the first)
                  }
                  deriving (Eq, Show, Read)
 
@@ -26,12 +55,35 @@ defaultWrapSettings :: WrapSettings
 defaultWrapSettings =
     WrapSettings { preserveIndentation = False
                  , breakLongWords = False
+                 , fillStrategy = NoFill
+                 , fillScope = FillAfterFirst
                  }
 
+-- | Apply a function to the portion of a list of lines indicated by
+--   the 'FillScope'.
+withScope :: FillScope -> (a -> a) -> [a] -> [a]
+withScope FillAfterFirst = onTail
+withScope FillAll        = map
+
+-- | Map a function over the tail of a list.
+onTail :: (a -> a) -> [a] -> [a]
+onTail _ []     = []
+onTail f (a:as) = a : map f as
+
+-- | Apply the fill specified in the 'WrapSettings' to a list of lines.
+applyFill :: WrapSettings -> [T.Text] -> [T.Text]
+applyFill settings =
+    let scope = fillScope settings
+    in case fillStrategy settings of
+           NoFill       -> id
+           FillIndent n -> withScope scope (T.append (T.replicate n (T.pack " ")))
+           FillPrefix t -> withScope scope (T.append t)
+
 -- | Wrap text at the specified width. Newlines and whitespace in the
--- input text are preserved. Returns the lines of text in wrapped form.
--- New lines introduced due to wrapping will have leading whitespace
--- stripped.
+-- input text are preserved. Returns the lines of text in wrapped
+-- form.  New lines introduced due to wrapping will have leading
+-- whitespace stripped prior to having any fill applied.  Preserved
+-- indentation is always placed before any fill.
 wrapTextToLines :: WrapSettings -> Int -> T.Text -> [T.Text]
 wrapTextToLines settings amt s =
     concat $ fmap (wrapLine settings amt) $ T.lines s
@@ -73,20 +125,28 @@ wrapLine :: WrapSettings
          -- ^ A single line of text.
          -> [T.Text]
 wrapLine settings limit t =
-    let go _ []     = [T.empty]
+    let restFillWidth      = fillWidth (fillStrategy settings)
+        firstLineFillWidth = if fillScope settings == FillAll then restFillWidth else 0
+
+        firstLineLimit = limit - T.length indent - firstLineFillWidth
+        restLimit      = limit - T.length indent - restFillWidth
+
+        go _ []     = [T.empty]
         go _ [WS _] = [T.empty]
-        go lim ts =
-            let (firstLine, maybeRest) = breakTokens settings lim ts
+        go isFirstLine ts =
+            let lim = if isFirstLine then firstLineLimit else restLimit
+                (firstLine, maybeRest) = breakTokens settings lim ts
                 firstLineText = T.stripEnd $ T.concat $ fmap tokenContent firstLine
             in case maybeRest of
-                Nothing -> [firstLineText]
-                Just rest -> firstLineText : go lim rest
+                Nothing   -> [firstLineText]
+                Just rest -> firstLineText : go False rest
         (indent, modifiedText) = if preserveIndentation settings
                                  then let i = T.takeWhile isSpace t
                                       in (T.take (limit - 1) i, T.drop (T.length i) t)
                                  else (T.empty, t)
-        result = go (limit - T.length indent) (tokenize modifiedText)
-    in (indent <>) <$> result
+
+        result = go True (tokenize modifiedText)
+    in map (indent <>) . applyFill settings $ result
 
 -- | Break a token sequence so that all tokens up to but not exceeding
 -- a length limit are included on the left, and if any remain on the
