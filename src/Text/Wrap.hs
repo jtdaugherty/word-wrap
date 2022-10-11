@@ -186,7 +186,6 @@ breakTokens settings limit ts =
         disallowed = maybeTrim disallowed'
 
         -- Trim leading whitespace on wrapped lines.
-        maybeTrim [] = []
         maybeTrim (WS _:toks) = toks
         maybeTrim toks = toks
 
