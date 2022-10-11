@@ -177,7 +177,8 @@ breakTokens settings limit ts =
                          if acc == 0 && breakLongWords settings
                          then let (h, tl) = T.splitAt limit (tokenContent tok)
                               in ([NonWS h], NonWS tl : toks)
-                         else if acc == 0 then ([tok], toks)
+                         else if acc == 0
+                              then ([tok], toks)
                               else ([], tok:toks)
 
         -- Allowed tokens are the ones we keep on this line. The rest go
