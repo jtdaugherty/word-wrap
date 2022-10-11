@@ -16,9 +16,12 @@ import qualified Data.Text as T
 -- | How should wrapped lines be filled (i.e. what kind of prefix
 --   should be attached?)
 data FillStrategy
-  = NoFill             -- ^ Don't do any filling (default)
-  | FillIndent Int     -- ^ Indent by this many spaces
-  | FillPrefix T.Text  -- ^ Prepend this text
+  = NoFill
+  -- ^ Don't do any filling (default)
+  | FillIndent Int
+  -- ^ Indent by this many spaces
+  | FillPrefix T.Text
+  -- ^ Prepend this text
   deriving (Eq, Show, Read)
 
 fillWidth :: FillStrategy -> Int
@@ -28,10 +31,12 @@ fillWidth (FillPrefix t) = T.length t
 
 -- | To which lines should the fill strategy be applied?
 data FillScope
-  = FillAfterFirst     -- ^ Apply any fill prefix only to lines after
-                       --   the first line (default)
-  | FillAll            -- ^ Apply any fill prefix to all lines, even
-                       --   if there is only one line
+  = FillAfterFirst
+  -- ^ Apply any fill prefix only to lines after the first line
+  -- (default)
+  | FillAll
+  -- ^ Apply any fill prefix to all lines, even if there is only one
+  -- line
   deriving (Eq, Show, Read)
 
 -- | Settings to control how wrapping is performed.
@@ -42,12 +47,12 @@ data WrapSettings =
                  , breakLongWords :: Bool
                  -- ^ Whether to break in the middle of the first word
                  -- on a line when that word exceeds the wrapping width.
-                 , fillStrategy        :: FillStrategy
+                 , fillStrategy :: FillStrategy
                  -- ^ What kind of prefix should be applied to lines
-                 --   after wrapping? (default: none)
-                 , fillScope           :: FillScope
+                 -- after wrapping? (default: none)
+                 , fillScope :: FillScope
                  -- ^ To which lines should the fill strategy be applied?
-                 --   (default: all but the first)
+                 -- (default: all but the first)
                  }
                  deriving (Eq, Show, Read)
 
