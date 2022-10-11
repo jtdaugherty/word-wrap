@@ -7,6 +7,10 @@ import Text.Wrap
 
 main :: IO ()
 main = hspec $ do
+    it "handles empty input" $ do
+      wrapTextToLines defaultWrapSettings 7 ""
+        `shouldBe` []
+
     it "leaves short lines untouched" $ do
       wrapTextToLines defaultWrapSettings 7 "foo bar"
         `shouldBe` ["foo bar"]
