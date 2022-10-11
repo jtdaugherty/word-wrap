@@ -67,13 +67,13 @@ defaultWrapSettings =
 -- | Apply a function to the portion of a list of lines indicated by
 --   the 'FillScope'.
 withScope :: FillScope -> (a -> a) -> [a] -> [a]
-withScope FillAfterFirst = onTail
+withScope FillAfterFirst = mapTail
 withScope FillAll        = map
 
 -- | Map a function over the tail of a list.
-onTail :: (a -> a) -> [a] -> [a]
-onTail _ []     = []
-onTail f (a:as) = a : map f as
+mapTail :: (a -> a) -> [a] -> [a]
+mapTail _ []     = []
+mapTail f (a:as) = a : map f as
 
 -- | Apply the fill specified in the 'WrapSettings' to a list of lines.
 applyFill :: WrapSettings -> [T.Text] -> [T.Text]
