@@ -190,7 +190,7 @@ breakTokens settings limit ts =
         maybeTrim (WS _:toks) = toks
         maybeTrim toks = toks
 
-        result = if null disallowed
-                 then (allowed, Nothing)
-                 else (allowed, Just disallowed)
+        result = (allowed, if null disallowed
+                           then Nothing
+                           else Just disallowed)
     in result
