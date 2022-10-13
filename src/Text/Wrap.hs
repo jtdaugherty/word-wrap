@@ -15,14 +15,14 @@ import qualified Data.Text as T
 
 -- | How should wrapped lines be filled (i.e. what kind of prefix
 --   should be attached?)
-data FillStrategy
-  = NoFill
-  -- ^ Don't do any filling (default)
-  | FillIndent Int
-  -- ^ Indent by this many spaces
-  | FillPrefix T.Text
-  -- ^ Prepend this text
-  deriving (Eq, Show, Read)
+data FillStrategy =
+    NoFill
+    -- ^ Don't do any filling (default)
+    | FillIndent Int
+    -- ^ Indent by this many spaces
+    | FillPrefix T.Text
+    -- ^ Prepend this text
+    deriving (Eq, Show, Read)
 
 fillWidth :: FillStrategy -> Int
 fillWidth NoFill         = 0
@@ -30,14 +30,14 @@ fillWidth (FillIndent n) = n
 fillWidth (FillPrefix t) = T.length t
 
 -- | To which lines should the fill strategy be applied?
-data FillScope
-  = FillAfterFirst
-  -- ^ Apply any fill prefix only to lines after the first line
-  -- (default)
-  | FillAll
-  -- ^ Apply any fill prefix to all lines, even if there is only one
-  -- line
-  deriving (Eq, Show, Read)
+data FillScope =
+    FillAfterFirst
+    -- ^ Apply any fill prefix only to lines after the first line
+    -- (default)
+    | FillAll
+    -- ^ Apply any fill prefix to all lines, even if there is only one
+    -- line
+    deriving (Eq, Show, Read)
 
 -- | Settings to control how wrapping is performed.
 data WrapSettings =
