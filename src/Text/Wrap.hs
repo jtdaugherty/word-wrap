@@ -14,7 +14,7 @@ import Data.Char (isSpace)
 import qualified Data.Text as T
 
 -- | How should wrapped lines be filled (i.e. what kind of prefix
---   should be attached?)
+-- should be attached?)
 data FillStrategy =
     NoFill
     -- ^ Don't do any filling (default)
